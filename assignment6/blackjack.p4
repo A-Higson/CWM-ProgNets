@@ -52,7 +52,10 @@ const bit<8>  BLACKJACK_P     = 0x50;   // 'P'
 const bit<8>  BLACKJACK_4     = 0x34;   // '4'
 const bit<8>  BLACKJACK_VER   = 0x01;   // v0.1
 
-const bit<6>  SPADE_A         = 0x01;
+const bit<2>  HIT   = 0x01;
+const bit<2>  STAND   = 0x02;
+
+/*const bit<6>  SPADE_A         = 0x01;
 const bit<6>  SPADE_2         = 0x02;
 const bit<6>  SPADE_3         = 0x03;
 const bit<6>  SPADE_4         = 0x04;
@@ -109,19 +112,14 @@ const bit<6>  CLUB_Q          = 0x3c;
 const bit<6>  CLUB_K          = 0x3d;
 
 const bit<6>  null            = 0x00;
-
+*/
 header blackjack_t {
 /*TODO*/
     bit<8>  p;
     bit<8>  four;
     bit<8>  ver;
     
-    bit<4>  player_count;
-    bit<4>  dealer_count;
-    
     bit<2>  move;
-    bit<2>  bust;
-    bit<2>  res; 
     
     bit<6>  card1;
     bit<6>  card2;
@@ -138,6 +136,13 @@ header blackjack_t {
     bit<6>  card13;
     bit<6>  card14;
     bit<6>  card15;
+    
+    bit<4>  player_count;
+    bit<4>  dealer_count;
+     
+    bit<2>  res; 
+    bit<2>  bust;
+
 }
 
 
@@ -228,27 +233,27 @@ control MyIngress(inout headers hdr,
     }
     
     action check_sum_dealer(bit<4> num) {
-    	bit<6> tmp_sum_dealer;
+    	bit<6> tmp_sum_dealer = 0;
     	if (num >= 14){}
     	    
     	    else if (num == 13){
-    	    tmp_sum_dealer = hdr.blackjack.card15 + hdr.blackjack.card14 + hdr.blackjack.card13;}
+    	    tmp_sum_dealer = (hdr.blackjack.card15|0x0f) + (hdr.blackjack.card14|0x0f) + (hdr.blackjack.card13|0x0f);}
     	    else if (num == 12){
-    	    tmp_sum_dealer = hdr.blackjack.card15 + hdr.blackjack.card14 + hdr.blackjack.card13 + hdr.blackjack.card12;}
+    	    tmp_sum_dealer = (hdr.blackjack.card15|0x0f) + (hdr.blackjack.card14|0x0f) + (hdr.blackjack.card13|0x0f) + (hdr.blackjack.card12|0x0f);}
     	    else if (num == 11){
-    	    tmp_sum_dealer = hdr.blackjack.card15 + hdr.blackjack.card14 + hdr.blackjack.card13 + hdr.blackjack.card12 + hdr.blackjack.card11;}
+    	    tmp_sum_dealer = (hdr.blackjack.card15|0x0f) + (hdr.blackjack.card14|0x0f) + (hdr.blackjack.card13|0x0f) + (hdr.blackjack.card12|0x0f) + (hdr.blackjack.card11|0x0f);}
     	    else if (num == 10){
-    	    tmp_sum_dealer = hdr.blackjack.card15 + hdr.blackjack.card14 + hdr.blackjack.card13 + hdr.blackjack.card12 + hdr.blackjack.card11 + hdr.blackjack.card10;}
+    	    tmp_sum_dealer =(hdr.blackjack.card15|0x0f) + (hdr.blackjack.card14|0x0f) + (hdr.blackjack.card13|0x0f) + (hdr.blackjack.card12|0x0f) + (hdr.blackjack.card11|0x0f) + (hdr.blackjack.card10|0x0f);}
     	    else if (num == 9){
-    	    tmp_sum_dealer = hdr.blackjack.card15 + hdr.blackjack.card14 + hdr.blackjack.card13 + hdr.blackjack.card12 + hdr.blackjack.card11 + hdr.blackjack.card10 + hdr.blackjack.card9;}
+    	    tmp_sum_dealer = (hdr.blackjack.card15|0x0f) + (hdr.blackjack.card14|0x0f) + (hdr.blackjack.card13|0x0f) + (hdr.blackjack.card12|0x0f) + (hdr.blackjack.card11|0x0f) + (hdr.blackjack.card10|0x0f) + (hdr.blackjack.card9|0x0f);}
     	    else if (num == 8){
-    	    tmp_sum_dealer = hdr.blackjack.card15 + hdr.blackjack.card14 + hdr.blackjack.card13 + hdr.blackjack.card12 + hdr.blackjack.card11 + hdr.blackjack.card10 + hdr.blackjack.card9 + 	hdr.blackjack.card8;}
+    	    tmp_sum_dealer = (hdr.blackjack.card15|0x0f) + (hdr.blackjack.card14|0x0f) + (hdr.blackjack.card13|0x0f) + (hdr.blackjack.card12|0x0f) + (hdr.blackjack.card11|0x0f) + (hdr.blackjack.card10|0x0f) + (hdr.blackjack.card9|0x0f) + (hdr.blackjack.card8|0x0f);}
     	    else if (num == 7){
-     	    tmp_sum_dealer = hdr.blackjack.card15 + hdr.blackjack.card14 + hdr.blackjack.card13 + hdr.blackjack.card12 + hdr.blackjack.card11 + hdr.blackjack.card10 + hdr.blackjack.card9 + hdr.blackjack.card8 + hdr.blackjack.card7;}
+     	    tmp_sum_dealer = (hdr.blackjack.card15|0x0f) + (hdr.blackjack.card14|0x0f) + (hdr.blackjack.card13|0x0f) + (hdr.blackjack.card12|0x0f) + (hdr.blackjack.card11|0x0f) + (hdr.blackjack.card10|0x0f) + (hdr.blackjack.card9|0x0f) + (hdr.blackjack.card8|0x0f) + (hdr.blackjack.card7|0x0f);}
     	    else if (num == 6){
-     	    tmp_sum_dealer = hdr.blackjack.card15 + hdr.blackjack.card14 + hdr.blackjack.card13 + hdr.blackjack.card12 + hdr.blackjack.card11 + hdr.blackjack.card10 + hdr.blackjack.card9 + hdr.blackjack.card8 + hdr.blackjack.card7 + hdr.blackjack.card6;}
+     	    tmp_sum_dealer = (hdr.blackjack.card15|0x0f) + (hdr.blackjack.card14|0x0f) + (hdr.blackjack.card13|0x0f) + (hdr.blackjack.card12|0x0f) + (hdr.blackjack.card11|0x0f) + (hdr.blackjack.card10|0x0f) + (hdr.blackjack.card9|0x0f) + (hdr.blackjack.card8|0x0f) + (hdr.blackjack.card7|0x0f) + (hdr.blackjack.card6|0x0f);}
     	    else if (num == 5){
-     	    tmp_sum_dealer = hdr.blackjack.card15 + hdr.blackjack.card14 + hdr.blackjack.card13 + hdr.blackjack.card12 + hdr.blackjack.card11 + hdr.blackjack.card10 + hdr.blackjack.card9 + hdr.blackjack.card8 + hdr.blackjack.card7 + hdr.blackjack.card6 + hdr.blackjack.card5;}
+     	    tmp_sum_dealer = (hdr.blackjack.card15|0x0f) + (hdr.blackjack.card14|0x0f) + (hdr.blackjack.card13|0x0f) + (hdr.blackjack.card12|0x0f) + (hdr.blackjack.card11|0x0f) + (hdr.blackjack.card10|0x0f) + (hdr.blackjack.card9|0x0f) + (hdr.blackjack.card8|0x0f) + (hdr.blackjack.card7|0x0f) + (hdr.blackjack.card6|0x0f) + (hdr.blackjack.card5|0x0f);}
     	    
     	if (tmp_sum_dealer > 21){
     		hdr.blackjack.bust = 2;
@@ -260,27 +265,27 @@ control MyIngress(inout headers hdr,
     }
     
     action check_sum_player(bit<4> num) {
-    	bit<6> tmp_sum_player;
+    	bit<6> tmp_sum_player = 0;
     	if (num <= 2){}
     	    
     	    else if (num == 3){
-    	    tmp_sum_player = hdr.blackjack.card1 + hdr.blackjack.card2 + hdr.blackjack.card3;}
+    	    tmp_sum_player = (hdr.blackjack.card1|0x0f) + (hdr.blackjack.card2|0x0f) + (hdr.blackjack.card3|0x0f);}
     	    else if (num == 4){
-    	    tmp_sum_player = hdr.blackjack.card1 + hdr.blackjack.card2 + hdr.blackjack.card3 + hdr.blackjack.card4;}
+    	    tmp_sum_player = (hdr.blackjack.card1|0x0f) + (hdr.blackjack.card2|0x0f) + (hdr.blackjack.card3|0x0f) + (hdr.blackjack.card4|0x0f);}
     	    else if (num == 5){
-    	    tmp_sum_player = hdr.blackjack.card1 + hdr.blackjack.card2 + hdr.blackjack.card3 + hdr.blackjack.card4 + hdr.blackjack.card5;}
+    	    tmp_sum_player = (hdr.blackjack.card1|0x0f) + (hdr.blackjack.card2|0x0f) + (hdr.blackjack.card3|0x0f) + (hdr.blackjack.card4|0x0f) + (hdr.blackjack.card5|0x0f);}
     	    else if (num == 6){
-    	    tmp_sum_player = hdr.blackjack.card1 + hdr.blackjack.card2 + hdr.blackjack.card3 + hdr.blackjack.card4 + hdr.blackjack.card5 + hdr.blackjack.card6;}
+    	    tmp_sum_player = (hdr.blackjack.card1|0x0f) + (hdr.blackjack.card2|0x0f) + (hdr.blackjack.card3|0x0f) + (hdr.blackjack.card4|0x0f) + (hdr.blackjack.card5|0x0f) + (hdr.blackjack.card6|0x0f);}
     	    else if (num == 7){
-    	    tmp_sum_player = hdr.blackjack.card1 + hdr.blackjack.card2 + hdr.blackjack.card3 + hdr.blackjack.card4 + hdr.blackjack.card5 + hdr.blackjack.card6 + hdr.blackjack.card7;}
+    	    tmp_sum_player = (hdr.blackjack.card1|0x0f) + (hdr.blackjack.card2|0x0f) + (hdr.blackjack.card3|0x0f) + (hdr.blackjack.card4|0x0f) + (hdr.blackjack.card5|0x0f) + (hdr.blackjack.card6|0x0f) + (hdr.blackjack.card7|0x0f);}
     	    else if (num == 8){
-    	    tmp_sum_player = hdr.blackjack.card1 + hdr.blackjack.card2 + hdr.blackjack.card3 + hdr.blackjack.card4 + hdr.blackjack.card5 + hdr.blackjack.card6 + hdr.blackjack.card7 + hdr.blackjack.card8;}
+    	    tmp_sum_player = (hdr.blackjack.card1|0x0f) + (hdr.blackjack.card2|0x0f) + (hdr.blackjack.card3|0x0f) + (hdr.blackjack.card4|0x0f) + (hdr.blackjack.card5|0x0f) + (hdr.blackjack.card6|0x0f) + (hdr.blackjack.card7|0x0f) + (hdr.blackjack.card8|0x0f);}
     	    else if (num == 9){
-    	    tmp_sum_player = hdr.blackjack.card1 + hdr.blackjack.card2 + hdr.blackjack.card3 + hdr.blackjack.card4 + hdr.blackjack.card5 + hdr.blackjack.card6 + hdr.blackjack.card7 + hdr.blackjack.card8 + hdr.blackjack.card9;}
+    	    tmp_sum_player = (hdr.blackjack.card1|0x0f) + (hdr.blackjack.card2|0x0f) + (hdr.blackjack.card3|0x0f) + (hdr.blackjack.card4|0x0f) + (hdr.blackjack.card5|0x0f) + (hdr.blackjack.card6|0x0f) + (hdr.blackjack.card7|0x0f) + (hdr.blackjack.card8|0x0f) + (hdr.blackjack.card9|0x0f);}
     	    else if (num == 10){
-    	    tmp_sum_player = hdr.blackjack.card1 + hdr.blackjack.card2 + hdr.blackjack.card3 + hdr.blackjack.card4 + hdr.blackjack.card5 + hdr.blackjack.card6 + hdr.blackjack.card7 + hdr.blackjack.card8 + hdr.blackjack.card9 + hdr.blackjack.card10;}
+    	    tmp_sum_player = (hdr.blackjack.card1|0x0f) + (hdr.blackjack.card2|0x0f) + (hdr.blackjack.card3|0x0f) + (hdr.blackjack.card4|0x0f) + (hdr.blackjack.card5|0x0f) + (hdr.blackjack.card6|0x0f) + (hdr.blackjack.card7|0x0f) + (hdr.blackjack.card8|0x0f) + (hdr.blackjack.card9|0x0f) + (hdr.blackjack.card10|0x0f);}
     	    else if (num == 11){
-    	    tmp_sum_player = hdr.blackjack.card1 + hdr.blackjack.card2 + hdr.blackjack.card3 + hdr.blackjack.card4 + hdr.blackjack.card5 + hdr.blackjack.card6 + hdr.blackjack.card7 + hdr.blackjack.card8 + hdr.blackjack.card9 + hdr.blackjack.card10 + hdr.blackjack.card11;}
+    	    tmp_sum_player = (hdr.blackjack.card1|0x0f) + (hdr.blackjack.card2|0x0f) + (hdr.blackjack.card3|0x0f) + (hdr.blackjack.card4|0x0f) + (hdr.blackjack.card5|0x0f) + (hdr.blackjack.card6|0x0f) + (hdr.blackjack.card7|0x0f) + (hdr.blackjack.card8|0x0f) + (hdr.blackjack.card9|0x0f) + (hdr.blackjack.card10|0x0f) + (hdr.blackjack.card11|0x0f);}
     	    
     	if (tmp_sum_player > 21){
     		hdr.blackjack.bust = 1;
@@ -288,16 +293,16 @@ control MyIngress(inout headers hdr,
     	}
     }
     
-    action new_card(bit<4> num) {
+/*    action new_card(bit<4> num) {
         bit<6> tmp_suit;
         bit<6> tmp_card;
         
-/*      modify_field_rng_uniform(tmp_suit,1,4);  an attempt to do random number generation in p4
- *      modify_field_rng_uniform(tmp_card,1,13);
- */        
+
         tmp_suit = tmp_suit << 4;
         tmp_card = tmp_suit | tmp_card;
-    }   
+    }
+    
+   
     action check_card(bit<4> num, bit<6> tmp_card){  
      
         if (tmp_card == hdr.blackjack.card1){
@@ -363,35 +368,81 @@ control MyIngress(inout headers hdr,
         	else if (num == 15){
         	hdr.blackjack.card15 = tmp_card;}   
     }
-  
+ */ 
 
     action operation_hit() {
         /* TODO call send_back with an extra card for the player */
-        new_card(hdr.blackjack.player_count);
-        check_sum_player(hdr.blackjack.player_count);
+        if (hdr.blackjack.player_count == 0){
+        hdr.blackjack.player_count = 2;
+        hdr.blackjack.dealer_count = 15;
+        }
+        else{
         hdr.blackjack.player_count = hdr.blackjack.player_count + 1;
-         
+        }
+        
+        check_sum_player(hdr.blackjack.player_count); 
         send_back();       
     }
 	
 	action new_dealer_card(){
-		new_card(hdr.blackjack.dealer_count);
         check_sum_dealer(hdr.blackjack.dealer_count);
         hdr.blackjack.dealer_count = hdr.blackjack.dealer_count - 1;
 	}
     action operation_stand() {
         /* TODO call send_back with dealers hand and result */
-        
+        new_dealer_card();
         if (hdr.blackjack.bust >= 2) {
         	send_back();
         }
-        else        	
+        else{
         	new_dealer_card();
+        	if (hdr.blackjack.bust >= 2) {
+        		send_back();}
+        		else{
+        			new_dealer_card();
+        			if (hdr.blackjack.bust >= 2) {
+        				send_back();}  	
+        				else{
+        					new_dealer_card();
+        					if (hdr.blackjack.bust >= 2) {
+        						send_back();}           	
+        					else{
+        						new_dealer_card();
+        						if (hdr.blackjack.bust >= 2) {
+        								send_back();}
+        								else{
+        								new_dealer_card();
+        								if (hdr.blackjack.bust >= 2) {
+        								send_back();}           	
+        								else{
+        								new_dealer_card();
+        								if (hdr.blackjack.bust >= 2) {
+        									send_back();}           	
+        									else{
+        										new_dealer_card();
+        										if (hdr.blackjack.bust >= 2) {
+        											send_back();}           	
+        										else{
+        											new_dealer_card();
+        											if (hdr.blackjack.bust >= 2) {
+        												send_back();
+        											}         	
+        											else{
+        												new_dealer_card();
+        											}
+        										}
+        									}
+        									}
+        									}
+        									}
+        									}
+											}
+											}
     }
     
 
 
-        action operation_drop() {
+    action operation_drop() {
         mark_to_drop(standard_metadata);
     }
 
@@ -404,9 +455,11 @@ control MyIngress(inout headers hdr,
             operation_stand;
             operation_drop;
          }
-         
         const default_action = operation_drop();
-                    
+        const entries = {
+            HIT : operation_hit();
+            STAND: operation_stand();
+        }            
         
     }
 
