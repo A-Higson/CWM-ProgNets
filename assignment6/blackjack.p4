@@ -26,10 +26,12 @@
  * Version is currently 0.1 (0x01)
  * Op is an operation to Perform:
  
- * Ch is the operation of:
+ * mve is the operation of:
  *	'Hit'
  *	'Stand'
- * Bust stores if either player busts
+ * Bust stores if either player or dealer busts
+ * Ply_cnt stores the number of cards the player has
+ * Del_cnt stores the number of cards the dealer has
  */
  
 #include <core.p4>
@@ -208,17 +210,15 @@ control MyVerifyChecksum(inout headers hdr,
 control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
-    action send_back(bit<2> result, bit<2> bust) {
+    action send_back() {
         /* TODO
-         * - put the result back in hdr.blackjack.res
          * - swap MAC addresses in hdr.ethernet.dstAddr and
          *   hdr.ethernet.srcAddr using a temp variable
          * - Send the packet back to the port it came from
              by saving standard_metadata.ingress_port into
              standard_metadata.egress_spec
          */
-         hdr.blackjack.res = result;
-         hdr.blackjack.bust = bust;
+         
          
          bit<48> tmp_mac;
          tmp_mac = hdr.ethernet.dstAddr;
@@ -226,101 +226,170 @@ control MyIngress(inout headers hdr,
          hdr.ethernet.srcAddr = tmp_mac;
          standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
+    
+    action check_sum_dealer(bit<4> num) {
+    	bit<6> tmp_sum_dealer;
+    	if (num >= 14){}
+    	    
+    	    else if (num == 13){
+    	    tmp_sum_dealer = hdr.blackjack.card15 + hdr.blackjack.card14 + hdr.blackjack.card13;}
+    	    else if (num == 12){
+    	    tmp_sum_dealer = hdr.blackjack.card15 + hdr.blackjack.card14 + hdr.blackjack.card13 + hdr.blackjack.card12;}
+    	    else if (num == 11){
+    	    tmp_sum_dealer = hdr.blackjack.card15 + hdr.blackjack.card14 + hdr.blackjack.card13 + hdr.blackjack.card12 + hdr.blackjack.card11;}
+    	    else if (num == 10){
+    	    tmp_sum_dealer = hdr.blackjack.card15 + hdr.blackjack.card14 + hdr.blackjack.card13 + hdr.blackjack.card12 + hdr.blackjack.card11 + hdr.blackjack.card10;}
+    	    else if (num == 9){
+    	    tmp_sum_dealer = hdr.blackjack.card15 + hdr.blackjack.card14 + hdr.blackjack.card13 + hdr.blackjack.card12 + hdr.blackjack.card11 + hdr.blackjack.card10 + hdr.blackjack.card9;}
+    	    else if (num == 8){
+    	    tmp_sum_dealer = hdr.blackjack.card15 + hdr.blackjack.card14 + hdr.blackjack.card13 + hdr.blackjack.card12 + hdr.blackjack.card11 + hdr.blackjack.card10 + hdr.blackjack.card9 + 	hdr.blackjack.card8;}
+    	    else if (num == 7){
+     	    tmp_sum_dealer = hdr.blackjack.card15 + hdr.blackjack.card14 + hdr.blackjack.card13 + hdr.blackjack.card12 + hdr.blackjack.card11 + hdr.blackjack.card10 + hdr.blackjack.card9 + hdr.blackjack.card8 + hdr.blackjack.card7;}
+    	    else if (num == 6){
+     	    tmp_sum_dealer = hdr.blackjack.card15 + hdr.blackjack.card14 + hdr.blackjack.card13 + hdr.blackjack.card12 + hdr.blackjack.card11 + hdr.blackjack.card10 + hdr.blackjack.card9 + hdr.blackjack.card8 + hdr.blackjack.card7 + hdr.blackjack.card6;}
+    	    else if (num == 5){
+     	    tmp_sum_dealer = hdr.blackjack.card15 + hdr.blackjack.card14 + hdr.blackjack.card13 + hdr.blackjack.card12 + hdr.blackjack.card11 + hdr.blackjack.card10 + hdr.blackjack.card9 + hdr.blackjack.card8 + hdr.blackjack.card7 + hdr.blackjack.card6 + hdr.blackjack.card5;}
+    	    
+    	if (tmp_sum_dealer > 21){
+    		hdr.blackjack.bust = 2;
+    		hdr.blackjack.res  = 1;
+    		}
+    		else if (tmp_sum_dealer >=17){
+    		hdr.blackjack.bust = 3;
+    		}
+    }
+    
+    action check_sum_player(bit<4> num) {
+    	bit<6> tmp_sum_player;
+    	if (num <= 2){}
+    	    
+    	    else if (num == 3){
+    	    tmp_sum_player = hdr.blackjack.card1 + hdr.blackjack.card2 + hdr.blackjack.card3;}
+    	    else if (num == 4){
+    	    tmp_sum_player = hdr.blackjack.card1 + hdr.blackjack.card2 + hdr.blackjack.card3 + hdr.blackjack.card4;}
+    	    else if (num == 5){
+    	    tmp_sum_player = hdr.blackjack.card1 + hdr.blackjack.card2 + hdr.blackjack.card3 + hdr.blackjack.card4 + hdr.blackjack.card5;}
+    	    else if (num == 6){
+    	    tmp_sum_player = hdr.blackjack.card1 + hdr.blackjack.card2 + hdr.blackjack.card3 + hdr.blackjack.card4 + hdr.blackjack.card5 + hdr.blackjack.card6;}
+    	    else if (num == 7){
+    	    tmp_sum_player = hdr.blackjack.card1 + hdr.blackjack.card2 + hdr.blackjack.card3 + hdr.blackjack.card4 + hdr.blackjack.card5 + hdr.blackjack.card6 + hdr.blackjack.card7;}
+    	    else if (num == 8){
+    	    tmp_sum_player = hdr.blackjack.card1 + hdr.blackjack.card2 + hdr.blackjack.card3 + hdr.blackjack.card4 + hdr.blackjack.card5 + hdr.blackjack.card6 + hdr.blackjack.card7 + hdr.blackjack.card8;}
+    	    else if (num == 9){
+    	    tmp_sum_player = hdr.blackjack.card1 + hdr.blackjack.card2 + hdr.blackjack.card3 + hdr.blackjack.card4 + hdr.blackjack.card5 + hdr.blackjack.card6 + hdr.blackjack.card7 + hdr.blackjack.card8 + hdr.blackjack.card9;}
+    	    else if (num == 10){
+    	    tmp_sum_player = hdr.blackjack.card1 + hdr.blackjack.card2 + hdr.blackjack.card3 + hdr.blackjack.card4 + hdr.blackjack.card5 + hdr.blackjack.card6 + hdr.blackjack.card7 + hdr.blackjack.card8 + hdr.blackjack.card9 + hdr.blackjack.card10;}
+    	    else if (num == 11){
+    	    tmp_sum_player = hdr.blackjack.card1 + hdr.blackjack.card2 + hdr.blackjack.card3 + hdr.blackjack.card4 + hdr.blackjack.card5 + hdr.blackjack.card6 + hdr.blackjack.card7 + hdr.blackjack.card8 + hdr.blackjack.card9 + hdr.blackjack.card10 + hdr.blackjack.card11;}
+    	    
+    	if (tmp_sum_player > 21){
+    		hdr.blackjack.bust = 1;
+    		hdr.blackjack.res = 2;
+    	}
+    }
+    
+    action new_card(bit<4> num) {
+        bit<6> tmp_suit;
+        bit<6> tmp_card;
+        
+/*      modify_field_rng_uniform(tmp_suit,1,4);  an attempt to do random number generation in p4
+ *      modify_field_rng_uniform(tmp_card,1,13);
+ */        
+        tmp_suit = tmp_suit << 4;
+        tmp_card = tmp_suit | tmp_card;
+    }   
+    action check_card(bit<4> num, bit<6> tmp_card){  
+     
+        if (tmp_card == hdr.blackjack.card1){
+            new_card(num);}
+            else if (tmp_card == hdr.blackjack.card2){
+            new_card(num);}
+            else if (tmp_card == hdr.blackjack.card3){
+            new_card(num);}
+            else if (tmp_card == hdr.blackjack.card4){
+            new_card(num);}
+            else if (tmp_card == hdr.blackjack.card5){
+            new_card(num);}
+            else if (tmp_card == hdr.blackjack.card6){
+            new_card(num);}
+            else if (tmp_card == hdr.blackjack.card7){
+            new_card(num);}
+            else if (tmp_card == hdr.blackjack.card8){
+            new_card(num);}
+            else if (tmp_card == hdr.blackjack.card9){
+            new_card(num);}
+            else if (tmp_card == hdr.blackjack.card10){
+            new_card(num);}
+            else if (tmp_card == hdr.blackjack.card11){
+            new_card(num);}
+            else if (tmp_card == hdr.blackjack.card12){
+            new_card(num);}
+            else if (tmp_card == hdr.blackjack.card13){
+            new_card(num);}
+            else if (tmp_card == hdr.blackjack.card14){
+            new_card(num);}
+            else if (tmp_card == hdr.blackjack.card15){
+            new_card(num);}
+                
+        if (num == 1){
+        	hdr.blackjack.card1 = tmp_card;}
+        	else if (num == 2){
+        	new_card(1);
+        	hdr.blackjack.card2 = tmp_card;}
+        	else if (num == 3){
+        	hdr.blackjack.card3 = tmp_card;}
+        	else if (num == 4){
+        	hdr.blackjack.card4 = tmp_card;}
+        	else if (num == 5){
+        	hdr.blackjack.card5 = tmp_card;}
+        	else if (num == 6){
+        	hdr.blackjack.card6 = tmp_card;}
+        	else if (num == 7){
+        	hdr.blackjack.card7 = tmp_card;}
+        	else if (num == 8){
+        	hdr.blackjack.card8 = tmp_card;}
+        	else if (num == 9){
+        	hdr.blackjack.card9 = tmp_card;}
+        	else if (num == 10){
+        	hdr.blackjack.card10 = tmp_card;}
+        	else if (num == 11){
+        	hdr.blackjack.card11 = tmp_card;}
+        	else if (num == 12){
+        	hdr.blackjack.card12 = tmp_card;}
+        	else if (num == 13){
+        	hdr.blackjack.card13 = tmp_card;}
+        	else if (num == 14){
+        	hdr.blackjack.card14 = tmp_card;}
+        	else if (num == 15){
+        	hdr.blackjack.card15 = tmp_card;}   
+    }
+  
 
     action operation_hit() {
         /* TODO call send_back with an extra card for the player */
-        new_card()
-        
+        new_card(hdr.blackjack.player_count);
+        check_sum_player(hdr.blackjack.player_count);
+        hdr.blackjack.player_count = hdr.blackjack.player_count + 1;
          
         send_back();       
     }
-
+	
+	action new_dealer_card(){
+		new_card(hdr.blackjack.dealer_count);
+        check_sum_dealer(hdr.blackjack.dealer_count);
+        hdr.blackjack.dealer_count = hdr.blackjack.dealer_count - 1;
+	}
     action operation_stand() {
         /* TODO call send_back with dealers hand and result */
-        send_back();
+        
+        if (hdr.blackjack.bust >= 2) {
+        	send_back();
+        }
+        else        	
+        	new_dealer_card();
     }
     
-    action new_card(num) {
-        bit<6> tmp_suit
-        bit<6> tmp_card
-        
-        modify_field_rng_uniform(tmp_suit,1,4)
-        modify_field_rng_uniform(tmp_card,1,13)
-        
-        shift_left(tmp_suit,tmp_suit,4)
-        bit_or(tmp_card,tmp_suit,tmp_card)
-        
-        if tmp_card == card1
-            new_card(num)
-            else if tmp_card == card2
-            new_card(num)
-            else if tmp_card == card3
-            new_card(num)
-            else if tmp_card == card4
-            new_card(num)
-            else if tmp_card == card5
-            new_card(num)
-            else if tmp_card == card6
-            new_card(num)
-            else if tmp_card == card7
-            new_card(num)
-            else if tmp_card == card8
-            new_card(num)
-            else if tmp_card == card9
-            new_card(num)
-            else if tmp_card == card10
-            new_card(num)
-            else if tmp_card == card11
-            new_card(num)
-            else if tmp_card == card12
-            new_card(num)
-            else if tmp_card == card13
-            new_card(num)
-            else if tmp_card == card14
-            new_card(num)
-            else if tmp_card == card15
-            new_card(num) 
-                
-        if num == 1
-        	hdr.blackjack.card1 = tmp_card
-        	else if num == 2
-        	new_card(1)
-        	hdr.blackjack.card2 = tmp_card
-        	else if num == 3
-        	hdr.blackjack.card3 = tmp_card
-        	else if num == 4
-        	hdr.blackjack.card4 = tmp_card
-        	else if num == 5
-        	hdr.blackjack.card5 = tmp_card
-        	else if num == 6
-        	hdr.blackjack.card6 = tmp_card
-        	else if num == 7
-        	hdr.blackjack.card7 = tmp_card
-        	else if num == 8
-        	hdr.blackjack.card8 = tmp_card
-        	else if num == 9
-        	hdr.blackjack.card9 = tmp_card
-        	else if num == 10
-        	hdr.blackjack.card10 = tmp_card
-        	else if num == 11
-        	hdr.blackjack.card11 = tmp_card
-        	else if num == 12
-        	hdr.blackjack.card12 = tmp_card
-        	else if num == 13
-        	hdr.blackjack.card13 = tmp_card
-        	else if num == 14
-        	hdr.blackjack.card14 = tmp_card
-        	else if num == 15
-        	hdr.blackjack.card15 = tmp_card   
-    }
-    
-    action check_sum_player(num) {
-    	bit<5>
-    	if num =< 2
-    	    
-    	    else if num == 3
-    	    
-    }
+
 
         action operation_drop() {
         mark_to_drop(standard_metadata);
@@ -328,19 +397,17 @@ control MyIngress(inout headers hdr,
 
     table calculate {
         key = {
-            hdr.blackjack.choice      : exact;
+            hdr.blackjack.move      : exact;
         }
         actions = {
             operation_hit;
             operation_stand;
+            operation_drop;
          }
          
         const default_action = operation_drop();
-        const entries = {
-            BLACKJACK_PLUS : operation_hit();
-            BLACKJACK_MINUS: operation_stand();
-            
-        }
+                    
+        
     }
 
     apply {
