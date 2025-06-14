@@ -132,7 +132,7 @@ def main():
                     #print("Player:")
                     if blackjack.Player_count >= 2 and blackjack.Player_count <= 11:
                         # Loop through each player's card based on Player_count
-                        for i in range(1, blackjack.Player_count + 1):  # Loop over each card number
+                        for i in range(1, blackjack.Player_count):  # Loop over each card number
                             card_field = getattr(blackjack, f"card{i}")  # Fetch card{i} dynamically
                             print(card_values[card_field])
                 	#print("Dealer:")
